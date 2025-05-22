@@ -45,21 +45,13 @@ scrape_configs:
                 expressions:
                   tag: attrs.tag
             - regex:
-                expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>[A-Z]+)\]: (?P<logger>[^:]+)\((?P<line>\d+)\) - (?P<message>.*)$'
-                source: log
-            - labels:
-                level:
-                logger:
-                line:
-            - template:
+                expression: 'mango:firefox\|(?P<service>mango-firefox)\|'
                 source: tag
-                template: '{{ if contains .tag "mango-firefox" }}mango-firefox{{ end }}'
-                action: replace
             - labels:
                 service:
 
       - output:
-          source: message
+          source: log
 
   - job_name: system
     static_configs:
