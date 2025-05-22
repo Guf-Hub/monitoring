@@ -51,9 +51,9 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango-firefox\"} | json | level=~\"INFO\" | __error__=\"\"",
+          "expr": "{job=\"docker\"} | json | level=~\"(?i)info\"",
           "queryType": "range",
-          "refId": "A"
+          "refId": "INFO"
         }
       ],
       "title": "Info Logs",
@@ -88,9 +88,9 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango-firefox\"} | json | level=~\"WARNING\" | __error__=\"\"",
+          "expr": "{job=\"docker\"} | json | level=~\"(?i)warning\"",
           "queryType": "range",
-          "refId": "A"
+          "refId": "WARNING"
         }
       ],
       "title": "Warning Logs",
@@ -125,9 +125,9 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango-firefox\"} | json | level=~\"ERROR\" | __error__=\"\"",
+          "expr": "{job=\"docker\"} | json | level=~\"(?i)error\"",
           "queryType": "range",
-          "refId": "A"
+          "refId": "ERROR"
         }
       ],
       "title": "Error Logs",
@@ -162,9 +162,9 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango-firefox\"} | json | level=~\"DEBUG\" | __error__=\"\"",
+          "expr": "{job=\"docker\"} | json | level=~\"(?i)debug\"",
           "queryType": "range",
-          "refId": "A"
+          "refId": "DEBUG"
         }
       ],
       "title": "Debug Logs",
@@ -180,25 +180,25 @@
       {
         "current": {
           "selected": false,
-          "text": "mango-firefox",
-          "value": "mango-firefox"
+          "text": "docker",
+          "value": "docker"
         },
         "datasource": {
           "type": "loki",
           "uid": "loki"
         },
-        "definition": "label_values({job=\"docker\"}, service)",
+        "definition": "label_values(job)",
         "hide": 0,
-        "includeAll": true,
-        "label": "Application",
+        "includeAll": false,
+        "label": "Job",
         "multi": false,
-        "name": "app",
+        "name": "job",
         "options": [],
         "query": {
-          "query": "label_values({job=\"docker\"}, service)",
+          "query": "label_values(job)",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 2,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
