@@ -21,7 +21,6 @@ scrape_configs:
           - localhost
         labels:
           job: docker
-          service_name: mango-firefox
           __path__: /var/lib/docker/containers/*/*log
 
     pipeline_stages:
@@ -30,6 +29,7 @@ scrape_configs:
             stream: stream
             log: log
             time: time
+            attrs: attrs
 
       - labels:
           stream:
