@@ -32,19 +32,13 @@ scrape_configs:
             attrs: attrs
             tag: attrs.tag
 
-      - template:
-          source: tag
-          template: "{{ .tag }}"
-
       - regex:
-          expression: 'mango:firefox\|(?P<container_name>mango-firefox)\|sha256:[^|]+\|(?P<container_id>[^|]+)'
+          expression: 'mango:firefox\|(?P<service>mango-firefox)\|'
           source: tag
 
       - labels:
           stream:
-          container_id:
-          container_name:
-          service: container_name
+          service:
 
       - timestamp:
           source: time
