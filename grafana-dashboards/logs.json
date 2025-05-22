@@ -51,7 +51,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango\"} | json | level=~\"INFO\" | __error__=\"\"",
+          "expr": "{job=\"docker\", tag=~\"mango.*\"} | json | level=~\"INFO\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -88,7 +88,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango\"} | json | level=~\"WARNING\" | __error__=\"\"",
+          "expr": "{job=\"docker\", tag=~\"mango.*\"} | json | level=~\"WARNING\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -125,7 +125,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango\"} | json | level=~\"ERROR\" | __error__=\"\"",
+          "expr": "{job=\"docker\", tag=~\"mango.*\"} | json | level=~\"ERROR\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -162,7 +162,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", service=\"mango\"} | json | level=~\"DEBUG\" | __error__=\"\"",
+          "expr": "{job=\"docker\", tag=~\"mango.*\"} | json | level=~\"DEBUG\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -187,7 +187,7 @@
           "type": "loki",
           "uid": "loki"
         },
-        "definition": "label_values({job=\"docker\"}, service)",
+        "definition": "label_values({job=\"docker\"}, tag)",
         "hide": 0,
         "includeAll": true,
         "label": "Application",
@@ -195,7 +195,7 @@
         "name": "app",
         "options": [],
         "query": {
-          "query": "label_values({job=\"docker\"}, service)",
+          "query": "label_values({job=\"docker\"}, tag)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
