@@ -44,9 +44,10 @@ scrape_configs:
             - json:
                 expressions:
                   tag: attrs.tag
-            - regex:
-                expression: 'mango:firefox\|(?P<service_name>mango-firefox)\|'
+            - template:
                 source: tag
+                template: '{{ if contains .tag "mango-firefox" }}mango-firefox{{ end }}'
+                action: replace
             - labels:
                 service_name:
 
