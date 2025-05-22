@@ -57,7 +57,7 @@ scrape_configs:
           job: mango-app
           app: mango
           environment: production
-          __path__: /usr/src/app/**/*.log
+          __path__: /var/lib/docker/containers/*/logs/*.log
     pipeline_stages:
       - json:
           expressions:

@@ -51,7 +51,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{container_name=~\"$app\"} | json | level=~\"info|INFO\" | __error__=\"\"",
+          "expr": "{job=\"mango-app\"} | json | level=~\"info|INFO\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -88,7 +88,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{container_name=~\"$app\"} | json | level=~\"warning|WARNING\" | __error__=\"\"",
+          "expr": "{job=\"mango-app\"} | json | level=~\"warning|WARNING\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -125,7 +125,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{container_name=~\"$app\"} | json | level=~\"error|ERROR\" | __error__=\"\"",
+          "expr": "{job=\"mango-app\"} | json | level=~\"error|ERROR\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -162,7 +162,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{container_name=~\"$app\"} | json | level=~\"debug|DEBUG\" | __error__=\"\"",
+          "expr": "{job=\"mango-app\"} | json | level=~\"debug|DEBUG\" | __error__=\"\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -180,14 +180,14 @@
       {
         "current": {
           "selected": false,
-          "text": "mango.*",
-          "value": "mango.*"
+          "text": "mango-app",
+          "value": "mango-app"
         },
         "datasource": {
           "type": "loki",
           "uid": "loki"
         },
-        "definition": "label_values(container_name)",
+        "definition": "label_values(job)",
         "hide": 0,
         "includeAll": true,
         "label": "Application",
@@ -195,7 +195,7 @@
         "name": "app",
         "options": [],
         "query": {
-          "query": "label_values(container_name)",
+          "query": "label_values(job)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
