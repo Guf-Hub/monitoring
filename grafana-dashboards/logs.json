@@ -51,7 +51,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\"} | json | level=~\"(?i)info\"",
+          "expr": "{job=\"docker\"} | json | log=~\"(?i).*level=info.*\"",
           "queryType": "range",
           "refId": "INFO"
         }
@@ -88,7 +88,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\"} | json | level=~\"(?i)warning\"",
+          "expr": "{job=\"docker\"} | json | log=~\"(?i).*level=warning.*\"",
           "queryType": "range",
           "refId": "WARNING"
         }
@@ -125,7 +125,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\"} | json | level=~\"(?i)error\"",
+          "expr": "{job=\"docker\"} | json | log=~\"(?i).*level=error.*\"",
           "queryType": "range",
           "refId": "ERROR"
         }
@@ -162,7 +162,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\"} | json | level=~\"(?i)debug\"",
+          "expr": "{job=\"docker\"} | json | log=~\"(?i).*level=debug.*\"",
           "queryType": "range",
           "refId": "DEBUG"
         }
