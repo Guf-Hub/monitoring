@@ -41,6 +41,21 @@ scrape_configs:
           source: time
           format: RFC3339Nano
 
+      - match:
+          selector: '{container_name="mango-firefox"}'
+          stages:
+            - regex:
+                expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>[A-Z]+)\]: (?P<logger>[^:]+)\((?P<line>\d+)\) - (?P<message>.*)$'
+            - labels:
+                level:
+                logger:
+                line:
+            - timestamp:
+                source: timestamp
+                format: "2006-01-02 15:04:05"
+            - output:
+                source: message
+
   - job_name: system
     static_configs:
       - targets:
