@@ -45,10 +45,10 @@ scrape_configs:
                 expressions:
                   tag: attrs.tag
             - regex:
-                expression: 'mango:firefox\|(?P<service>mango-firefox)\|'
+                expression: 'mango:firefox\|(?P<service_name>mango-firefox)\|'
                 source: tag
             - labels:
-                service:
+                service_name:
 
       - output:
           source: log
