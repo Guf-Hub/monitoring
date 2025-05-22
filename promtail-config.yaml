@@ -38,6 +38,15 @@ scrape_configs:
           source: time
           format: RFC3339Nano
 
+      - match:
+          selector: '{job="docker"}'
+          stages:
+            - json:
+                expressions:
+                  tag: attrs.tag
+            - labels:
+                service: tag
+
       - output:
           source: log
 
