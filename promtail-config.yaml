@@ -32,8 +32,12 @@ scrape_configs:
             attrs: attrs
             tag: attrs.tag
 
+      - template:
+          source: tag
+          template: "{{ .tag }}"
+
       - regex:
-          expression: '(?P<image_name>[^|]+)\|(?P<container_name>[^|]+)\|(?P<image_id>[^|]+)\|(?P<container_id>[^|]+)'
+          expression: 'mango:firefox\|(?P<container_name>mango-firefox)\|sha256:[^|]+\|(?P<container_id>[^|]+)'
           source: tag
 
       - labels:
@@ -61,6 +65,9 @@ scrape_configs:
                 format: "2006-01-02 15:04:05"
             - output:
                 source: message
+
+      - output:
+          source: log
 
   - job_name: system
     static_configs:
