@@ -1,0 +1,63 @@
+apiVersion: 1
+
+providers:
+  - name: "System"
+    orgId: 1
+    folder: "System"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
+      pattern: server-monitoring\.json
+
+  - name: "Docker"
+    orgId: 1
+    folder: "Docker"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
+      pattern: docker\.json
+
+  - name: "Logs"
+    orgId: 1
+    folder: "Logs"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
+      pattern: app-logs\.json
+
+  - name: "Home"
+    orgId: 1
+    folder: "General"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
+      pattern: home\.json
+      homeDashboardUid: "home"
+
+  - name: 'Applications'
+    orgId: 1
+    folder: 'Applications'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true

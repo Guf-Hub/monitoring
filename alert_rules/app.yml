@@ -1,0 +1,68 @@
+groups:
+  - name: apps
+    rules:
+      - alert: AppHighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          category: app
+        annotations:
+          summary: "Высокий уровень ошибок в приложении {{ $labels.app }}"
+          description: "Уровень ошибок 5xx превышает 5% за последние 5 минут в приложении {{ $labels.app }}"
+          dashboard: "http://localhost:3000/d/app/app-overview"
+
+      - alert: AppHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          category: app
+        annotations:
+          summary: "Высокая задержка в приложении {{ $labels.app }}"
+          description: "95-й перцентиль задержки превышает 1 секунду в приложении {{ $labels.app }}"
+          dashboard: "http://localhost:3000/d/app/app-overview"
+
+      - alert: AppDown
+        expr: up{job="apps"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: app
+        annotations:
+          summary: "Приложение {{ $labels.app }} недоступно"
+          description: "Приложение {{ $labels.app }} не отвечает более 1 минуты"
+          dashboard: "http://localhost:3000/d/app/app-overview"
+
+      - alert: AppHighMemoryUsage
+        expr: container_memory_usage_bytes{container=~"player|mango"} / container_spec_memory_limit_bytes{container=~"player|mango"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          category: app
+        annotations:
+          summary: "Высокое использование памяти в {{ $labels.container }}"
+          description: "Использование памяти превышает 85% от лимита в контейнере {{ $labels.container }}"
+          dashboard: "http://localhost:3000/d/app/app-overview"
+
+      - alert: AppHighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{container=~"player|mango"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: app
+        annotations:
+          summary: "Высокая загрузка CPU в {{ $labels.container }}"
+          description: "Использование CPU превышает 80% в контейнере {{ $labels.container }}"
+          dashboard: "http://localhost:3000/d/app/app-overview"
+
+      - alert: AppMemoryLimit
+        expr: container_memory_usage_bytes{container=~"player|mango"} / container_spec_memory_limit_bytes{container=~"player|mango"} > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          category: app
+        annotations:
+          summary: "Критическое использование памяти в {{ $labels.container }}"
+          description: "Использование памяти приближается к лимиту (95%) в контейнере {{ $labels.container }}"
+          dashboard: "http://localhost:3000/d/app/app-overview"

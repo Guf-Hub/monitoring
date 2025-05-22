@@ -1,0 +1,260 @@
+x-defaults: &default-settings
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+      mode: "non-blocking"
+      max-buffer-size: "25m"
+      tag: "{{.Name}}"
+      labels: "app,environment"
+      env: "production"
+
+x-env: &env-settings
+  env_file:
+    - .env
+
+services:
+  loki:
+    image: grafana/loki:3.5.0
+    container_name: loki
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: "non-blocking"
+        max-buffer-size: "25m"
+        tag: "{{.Name}}"
+        labels: "app,environment"
+        env: "production"
+    ports:
+      - "127.0.0.1:3100:3100"  # API Loki (для сбора логов Promtail, только локально)
+    networks:
+      monitoring:
+        aliases:
+          - loki
+      mango_network:  # Сеть для mango
+        aliases:
+          - loki
+      player_network:  # Сеть для player
+        aliases:
+          - loki
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  promtail:
+    image: grafana/promtail:3.5.0
+    container_name: promtail
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - /var/log:/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yaml
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: "non-blocking"
+        max-buffer-size: "25m"
+        tag: "{{.Name}}"
+        labels: "app,environment"
+        env: "production"
+    ports:
+      - "127.0.0.1:9080:9080"  # API Promtail (для отладки, только локально)
+    depends_on:
+      loki:
+        condition: service_healthy
+    networks:
+      monitoring:
+        aliases:
+          - promtail
+      mango_network:  # Сеть для mango
+        aliases:
+          - promtail
+      player_network:  # Сеть для player
+        aliases:
+          - promtail
+    user: "0"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9080/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: prometheus
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: "non-blocking"
+        max-buffer-size: "25m"
+        tag: "{{.Name}}"
+        labels: "app,environment"
+        env: "production"
+    env_file:
+      - .env
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules:/etc/prometheus/alert_rules
+      - prometheus_data:/prometheus
+    networks:
+      monitoring:
+      mango_network:  # Сеть для mango
+        aliases:
+          - prometheus
+      player_network:  # Сеть для player
+        aliases:
+          - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "127.0.0.1:9090:9090"  # Веб-интерфейс Prometheus (только для локального доступа)
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: "non-blocking"
+        max-buffer-size: "25m"
+        tag: "{{.Name}}"
+        labels: "app,environment"
+        env: "production"
+    ports:
+      - "127.0.0.1:9100:9100"  # Метрики ОС (Prometheus собирает внутри сети)
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9100/metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: "non-blocking"
+        max-buffer-size: "25m"
+        tag: "{{.Name}}"
+        labels: "app,environment"
+        env: "production"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "127.0.0.1:8080:8080"  # Метрики контейнеров (Prometheus собирает внутри сети)
+    networks:
+      - monitoring
+    depends_on:
+      node-exporter:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: alertmanager
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: "non-blocking"
+        max-buffer-size: "25m"
+        tag: "{{.Name}}"
+        labels: "app,environment"
+        env: "production"
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    environment:
+      - telegram_bot_token=${telegram_bot_token}
+      - telegram_chat_id=${telegram_chat_id}
+      - smtp_host=${smtp_host:-localhost}
+      - smtp_port=${smtp_port:-25}
+      - smtp_from=${smtp_from:-alertmanager@localhost}
+      - smtp_to=${smtp_to:-admin@localhost}
+    networks:
+      - monitoring
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  loki_data:
+  prometheus_data:
+  alertmanager_data:
+
+networks:
+  monitoring:
+    name: monitoring
+    external: true
+    driver: bridge
+  mango_network:
+    external: true
+    name: mango_default  # Сеть для mango сервиса
+  player_network:
+    external: true
+    name: player_default  # Сеть для player сервиса

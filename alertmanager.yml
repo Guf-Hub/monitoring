@@ -1,0 +1,109 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: "${smtp_host}:${smtp_port}"
+  smtp_from: "${smtp_from}"
+  smtp_require_tls: false
+  telegram_api_url: https://api.telegram.org
+
+route:
+  group_by: ["alertname", "container", "service", "category"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: "telegram-notifications"
+  routes:
+    - match:
+        severity: critical
+      receiver: "telegram-critical"
+      continue: true
+    - match:
+        category: system
+      receiver: "telegram-system"
+      continue: true
+    - match:
+        category: docker
+      receiver: "telegram-docker"
+      continue: true
+
+receivers:
+  - name: "telegram-notifications"
+    telegram_configs:
+      - bot_token: "${telegram_bot_token}"
+        chat_id: 450022478
+        parse_mode: "HTML"
+        message: |
+          <b>🚨 {{ .Status | toUpper }}</b>
+          <b>Alert:</b> {{ .CommonLabels.alertname }}
+          <b>Severity:</b> {{ .CommonLabels.severity }}
+          <b>Category:</b> {{ .CommonLabels.category }}
+          <b>Container:</b> {{ .CommonLabels.container }}
+          <b>Service:</b> {{ .CommonLabels.service }}
+          <b>Description:</b> {{ .CommonAnnotations.description }}
+          <b>Value:</b> {{ .CommonAnnotations.value }}
+          <b>Time:</b> {{ .StartsAt | since }}
+          <b>Dashboard:</b> {{ .CommonAnnotations.dashboard }}
+        send_resolved: true
+
+  - name: "telegram-critical"
+    telegram_configs:
+      - bot_token: "${telegram_bot_token}"
+        chat_id: 450022478
+        parse_mode: "HTML"
+        message: |
+          <b>🔥 CRITICAL ALERT</b>
+          <b>Alert:</b> {{ .CommonLabels.alertname }}
+          <b>Category:</b> {{ .CommonLabels.category }}
+          <b>Container:</b> {{ .CommonLabels.container }}
+          <b>Service:</b> {{ .CommonLabels.service }}
+          <b>Description:</b> {{ .CommonAnnotations.description }}
+          <b>Value:</b> {{ .CommonAnnotations.value }}
+          <b>Time:</b> {{ .StartsAt | since }}
+          <b>Details:</b> {{ .CommonAnnotations.summary }}
+          <b>Dashboard:</b> {{ .CommonAnnotations.dashboard }}
+        send_resolved: true
+
+  - name: "telegram-system"
+    telegram_configs:
+      - bot_token: "${telegram_bot_token}"
+        chat_id: 450022478
+        parse_mode: "HTML"
+        message: |
+          <b>💻 System Alert</b>
+          <b>Alert:</b> {{ .CommonLabels.alertname }}
+          <b>Severity:</b> {{ .CommonLabels.severity }}
+          <b>Description:</b> {{ .CommonAnnotations.description }}
+          <b>Value:</b> {{ .CommonAnnotations.value }}
+          <b>Time:</b> {{ .StartsAt | since }}
+          <b>Dashboard:</b> {{ .CommonAnnotations.dashboard }}
+        send_resolved: true
+
+  - name: "telegram-docker"
+    telegram_configs:
+      - bot_token: "${telegram_bot_token}"
+        chat_id: 450022478
+        parse_mode: "HTML"
+        message: |
+          <b>🐳 Docker Alert</b>
+          <b>Alert:</b> {{ .CommonLabels.alertname }}
+          <b>Severity:</b> {{ .CommonLabels.severity }}
+          <b>Container:</b> {{ .CommonLabels.container }}
+          <b>Service:</b> {{ .CommonLabels.service }}
+          <b>Description:</b> {{ .CommonAnnotations.description }}
+          <b>Value:</b> {{ .CommonAnnotations.value }}
+          <b>Time:</b> {{ .StartsAt | since }}
+          <b>Dashboard:</b> {{ .CommonAnnotations.dashboard }}
+        send_resolved: true
+
+  - name: "email-notifications"
+    email_configs:
+      - to: "${smtp_to}"
+        send_resolved: true
+        headers:
+          subject: "[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}"
+
+inhibit_rules:
+  - source_match:
+      severity: "critical"
+    target_match:
+      severity: "warning"
+    equal: ["alertname", "container", "service", "category"]

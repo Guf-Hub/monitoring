@@ -1,0 +1,126 @@
+groups:
+  - name: system
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "Высокая загрузка CPU на {{ $labels.instance }}"
+          description: "CPU загружен на {{ $value | humanizePercentage }}"
+          value: "{{ $value | humanizePercentage }}"
+          dashboard: "System Overview"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "Высокое использование памяти на {{ $labels.instance }}"
+          description: "Используется {{ $value | humanizePercentage }} памяти"
+          value: "{{ $value | humanizePercentage }}"
+          dashboard: "System Overview"
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_free_bytes{mountpoint="/"}) / node_filesystem_size_bytes{mountpoint="/"} * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "Высокое использование диска на {{ $labels.instance }}"
+          description: "Используется {{ $value | humanizePercentage }} диска"
+          value: "{{ $value | humanizePercentage }}"
+          dashboard: "System Overview"
+
+  - name: docker
+    rules:
+      - alert: ContainerDown
+        expr: up{job="docker"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: docker
+        annotations:
+          summary: "Контейнер остановлен {{ $labels.container }}"
+          description: "Контейнер {{ $labels.container }} не работает более 1 минуты"
+          value: "DOWN"
+          dashboard: "Docker Overview"
+
+      - alert: ContainerRestarting
+        expr: increase(container_restarts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          category: docker
+        annotations:
+          summary: "Контейнер перезапускается {{ $labels.container }}"
+          description: "Контейнер {{ $labels.container }} перезапускался {{ $value }} раз за последние 5 минут"
+          value: "{{ $value }} перезапусков"
+          dashboard: "Docker Overview"
+
+      - alert: ContainerHighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: docker
+        annotations:
+          summary: "Высокое использование памяти в контейнере {{ $labels.container }}"
+          description: "Контейнер {{ $labels.container }} использует {{ $value | humanizePercentage }} памяти"
+          value: "{{ $value | humanizePercentage }}"
+          dashboard: "Docker Overview"
+
+  - name: services
+    rules:
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: services
+        annotations:
+          summary: "Grafana недоступна"
+          description: "Grafana не отвечает более 1 минуты"
+          value: "DOWN"
+          dashboard: "Services Overview"
+
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: services
+        annotations:
+          summary: "Prometheus недоступен"
+          description: "Prometheus не отвечает более 1 минуты"
+          value: "DOWN"
+          dashboard: "Services Overview"
+
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: services
+        annotations:
+          summary: "Loki недоступен"
+          description: "Loki не отвечает более 1 минуты"
+          value: "DOWN"
+          dashboard: "Services Overview"
+
+      - alert: AlertManagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: services
+        annotations:
+          summary: "AlertManager недоступен"
+          description: "AlertManager не отвечает более 1 минуты"
+          value: "DOWN"
+          dashboard: "Services Overview"
