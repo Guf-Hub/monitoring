@@ -31,6 +31,11 @@ scrape_configs:
             time: time
             container_id: container_id
             container_name: container_name
+            tag: attrs.tag
+
+      - regex:
+          expression: '.*\|(?P<container_name>mango-firefox)\|.*'
+          source: tag
 
       - labels:
           stream:
