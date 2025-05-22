@@ -45,7 +45,6 @@ limits_config:
   max_query_parallelism: 32
   cardinality_limit: 100000
   max_streams_per_user: 10000
-  max_global_streams_per_user: 10000
   ingestion_rate_strategy: global
 
 table_manager:
