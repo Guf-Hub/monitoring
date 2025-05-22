@@ -29,25 +29,25 @@ scrape_configs:
             stream: stream
             log: log
             time: time
-            container_id: container_id
-            container_name: container_name
+            attrs: attrs
             tag: attrs.tag
 
       - regex:
-          expression: '.*\|(?P<container_name>mango-firefox)\|.*'
+          expression: '(?P<image_name>[^|]+)\|(?P<container_name>[^|]+)\|(?P<image_id>[^|]+)\|(?P<container_id>[^|]+)'
           source: tag
 
       - labels:
           stream:
           container_id:
           container_name:
+          service: container_name
 
       - timestamp:
           source: time
           format: RFC3339Nano
 
       - match:
-          selector: '{container_name="mango-firefox"}'
+          selector: '{service="mango-firefox"}'
           stages:
             - regex:
                 expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>[A-Z]+)\]: (?P<logger>[^:]+)\((?P<line>\d+)\) - (?P<message>.*)$'
