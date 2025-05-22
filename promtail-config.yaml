@@ -30,39 +30,22 @@ scrape_configs:
             log: log
             time: time
             attrs: attrs
-            tag: attrs.tag
-
-      - regex:
-          expression: 'mango:firefox\|(?P<container_name>mango-firefox)\|'
-          source: tag
 
       - labels:
           stream:
-          container_name:
-
-      - template:
-          source: container_name
-          template: '{{ if eq .container_name "mango-firefox" }}mango-firefox{{ end }}'
-          action: replace
-
-      - labels:
-          service:
-
-      - regex:
-          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>[A-Z]+)\]: (?P<logger>[^:]+)\((?P<line>\d+)\) - (?P<message>.*)$'
-          source: log
-
-      - labels:
-          level:
-          logger:
-          line:
 
       - timestamp:
-          source: timestamp
-          format: "2006-01-02 15:04:05"
+          source: time
+          format: RFC3339Nano
 
       - output:
-          source: message
+          source: log
+
+      - match:
+          selector: '{attrs.tag=~".*mango-firefox.*"}'
+          stages:
+            - labels:
+                service: mango-firefox
 
   - job_name: system
     static_configs:
