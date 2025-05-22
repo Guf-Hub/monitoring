@@ -31,23 +31,29 @@ scrape_configs:
             time: time
             container_id: container_id
             container_name: container_name
-            service: com.docker.compose.service
+            tag: attrs.tag
+
+      - regex:
+          expression: 'mango:firefox\|mango-firefox\|.*'
+          source: tag
+          action: keep
 
       - labels:
           stream:
           container_id:
           container_name:
-          service:
+          service: tag
 
       - timestamp:
           source: time
           format: RFC3339Nano
 
       - match:
-          selector: '{service="mango"}'
+          selector: '{service=~".*mango.*"}'
           stages:
             - regex:
                 expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>[A-Z]+)\]: (?P<logger>[^:]+)\((?P<line>\d+)\) - (?P<message>.*)$'
+                source: log
             - labels:
                 level:
                 logger:
